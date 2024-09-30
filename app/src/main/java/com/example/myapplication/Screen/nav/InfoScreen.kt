@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,7 +15,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
@@ -26,8 +29,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.* // Para remember, mutableStateOf, etc.
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.input.KeyboardType
 import kotlinx.coroutines.launch
+
+
 
 /**
  * Pantalla que muestra una lista de contactos.
@@ -39,157 +46,153 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun InfoScreen(contactList: List<Contact>, onBackToForm: () -> Unit, onEditContact: (Contact) -> Unit, onDeleteContact: (Contact) -> Unit) {
-    Column(
+    // Establecer el fondo de la pantalla
+    Box(
         modifier = Modifier
-            .fillMaxSize() // Ocupa todo el tamaño disponible
-            .padding(top = 48.dp), // Agrega un margen superior
-        horizontalAlignment = Alignment.CenterHorizontally, // Centra horizontalmente
-        verticalArrangement = Arrangement.spacedBy(8.dp) // Espaciado vertical entre elementos
+            .fillMaxSize()
+            .background(Color(0xFF6CD1FF)) // Fondo azul claro
     ) {
-        LazyColumn(
+        Column(
             modifier = Modifier
-                .fillMaxWidth() // Ocupa todo el ancho
-                .weight(1f), // Permite que la columna ocupe el espacio restante
-            verticalArrangement = Arrangement.spacedBy(8.dp) // Espaciado vertical entre los elementos de la lista
+                .fillMaxSize()
+                .padding(top = 48.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Itera sobre la lista de contactos y crea una tarjeta para cada uno
-            items(contactList.size) { index ->
-                val contact = contactList[index]
-                ContactCard(contact, onEditContact, onDeleteContact)
+            Text(
+                text = "Lista de Contactos",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(contactList) { contact ->
+                    ContactCard(contact, onEditContact, onDeleteContact)
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp)) // Espaciador para separar el botón
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón para volver al formulario
-        Button(onClick = onBackToForm) {
-            Text("Volver al Formulario") // Texto del botón
+            GradientButton(
+                text = "Volver al Formulario",
+                onClick = onBackToForm,
+                modifier = Modifier.fillMaxWidth(0.5f)
+            )
         }
     }
 }
 
-/**
- * Tarjeta que muestra la información de un contacto y opciones para editar o eliminar.
- *
- * @param contact Contacto a mostrar.
- * @param onEditContact Función que se ejecuta al editar el contacto.
- * @param onDeleteContact Función que se ejecuta al eliminar el contacto.
- */
+@Composable
+fun GradientButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+    ) {
+        Box(
+            modifier = Modifier
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(Color(0xFF64B5F6), Color(0xFF42A5F5)),
+                        start = Offset(0f, 0f),
+                        end = Offset(0f, 100f)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .padding(8.dp)
+        ) {
+            Text(text = text, color = Color.White)
+        }
+    }
+}
+
 @Composable
 fun ContactCard(contact: Contact, onEditContact: (Contact) -> Unit, onDeleteContact: (Contact) -> Unit) {
     Card(
         modifier = Modifier
-            .fillMaxWidth() // Ocupa todo el ancho
-            .padding(8.dp) // Margen alrededor de la tarjeta
+            .fillMaxWidth()
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Nombre: ${contact.nombre}") // Muestra el nombre del contacto
-            Text(text = "Apellido: ${contact.apellido}") // Muestra el apellido del contacto
-            Text(text = "Alias: ${contact.alias}") // Muestra el alias del contacto
-            Text(text = "Teléfono: ${contact.telefono}") // Muestra el teléfono del contacto
-            Text(text = "Hobbie: ${contact.hobbie}") // Muestra el hobbie del contacto
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+        ) {
+            Text(text = "Nombre: ${contact.nombre}", style = MaterialTheme.typography.bodyLarge)
+            Text(text = "Apellido: ${contact.apellido}", style = MaterialTheme.typography.bodyLarge)
+            Text(text = "Alias: ${contact.alias}", style = MaterialTheme.typography.bodyLarge)
+            Text(text = "Teléfono: ${contact.telefono}", style = MaterialTheme.typography.bodyLarge)
+            Text(text = "Hobbie: ${contact.hobbie}", style = MaterialTheme.typography.bodyLarge)
 
-            // Botón para editar el contacto
-            Button(onClick = { onEditContact(contact) }) {
-                Text("Editar") // Texto del botón de editar
-            }
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Botón para eliminar el contacto
-            Button(onClick = { onDeleteContact(contact) }) {
-                Text("Eliminar") // Texto del botón de eliminar
-            }
+            GradientButton(
+                text = "Editar",
+                onClick = { onEditContact(contact) },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            GradientButton(
+                text = "Eliminar",
+                onClick = { onDeleteContact(contact) },
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
 
-/**
- * Pantalla para editar la información de un contacto.
- *
- * @param contact Contacto a editar.
- * @param onSave Función que se ejecuta al guardar los cambios.
- * @param onNavigateBack Función que se ejecuta al navegar de regreso.
- */
 @Composable
 fun EditContact(contact: Contact, onSave: (Contact) -> Unit, onNavigateBack: () -> Unit) {
-    // Estado mutable para cada campo del contacto
     var nombre by remember { mutableStateOf(contact.nombre) }
     var apellido by remember { mutableStateOf(contact.apellido) }
     var alias by remember { mutableStateOf(contact.alias) }
     var telefono by remember { mutableStateOf(contact.telefono) }
     var hobbie by remember { mutableStateOf(contact.hobbie) }
 
-    // Estado para mostrar mensajes de Snackbar
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
-    // Diseño de la interfaz de usuario
     Box(
-        modifier = Modifier.fillMaxSize(), // Ocupa comleto el tamaño disponible
-        contentAlignment = Alignment.Center // Centra el contenido
+        modifier = Modifier.fillMaxSize().background(Color(0xFF48A6C2)),
+        contentAlignment = Alignment.Center
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp) // Margen alrededor de la columna
-                .fillMaxWidth(0.85f) // Ancho limitado al 85%
-                .background(Color.White, shape = RoundedCornerShape(16.dp)) // Fondo blanco con esquinas redondeadas
-                .padding(16.dp), // Margen interno
-            horizontalAlignment = Alignment.CenterHorizontally, // Centra horizontalmente
-            verticalArrangement = Arrangement.spacedBy(16.dp) // Espaciado vertical entre elementos
+                .padding(16.dp)
+                .fillMaxWidth(0.85f)
+                .background(Color.White, shape = RoundedCornerShape(16.dp))
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = "Editar Contacto", style = MaterialTheme.typography.displaySmall) // Título
+            Text(text = "Editar Contacto", style = MaterialTheme.typography.titleLarge)
 
-            // Campos de texto para editar los atributos del contacto
-            TextField(
-                value = nombre,
-                onValueChange = { newValue -> nombre = newValue }, // Actualiza el nombre
-                label = { Text("Nombre") } // Etiqueta del campo
-            )
-            TextField(
-                value = apellido,
-                onValueChange = { newValue -> apellido = newValue }, // Actualiza el apellido
-                label = { Text("Apellido") } // Etiqueta del campo
-            )
-            TextField(
-                value = alias,
-                onValueChange = { newValue -> alias = newValue }, // Actualiza el alias
-                label = { Text("Alias") } // Etiqueta del campo
-            )
-            TextField(
-                value = telefono,
-                onValueChange = { newValue -> telefono = newValue }, // Actualiza el teléfono
-                label = { Text("Teléfono") }, // Etiqueta del campo
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number) // Tipo de teclado numérico
-            )
-            TextField(
-                value = hobbie,
-                onValueChange = { newValue -> hobbie = newValue }, // Actualiza el hobbie
-                label = { Text("Hobbie") } // Etiqueta del campo
-            )
+            TextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre") })
+            TextField(value = apellido, onValueChange = { apellido = it }, label = { Text("Apellido") })
+            TextField(value = alias, onValueChange = { alias = it }, label = { Text("Alias") })
+            TextField(value = telefono, onValueChange = { telefono = it }, label = { Text("Teléfono") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+            TextField(value = hobbie, onValueChange = { hobbie = it }, label = { Text("Hobbie") })
 
-            // Botón para guardar los cambios
-            Button(onClick = {
-                // Crea un nuevo contacto con los valores actualizados
-                val updatedContact = contact.copy(
-                    nombre = nombre,
-                    apellido = apellido,
-                    alias = alias,
-                    telefono = telefono,
-                    hobbie = hobbie
-                )
-                onSave(updatedContact) // Guarda los cambios
-
-                // Muestra un mensaje de confirmación
-                coroutineScope.launch {
-                    snackbarHostState.showSnackbar("Contacto guardado con éxito.")
+            GradientButton(
+                text = "Guardar Cambios",
+                onClick = {
+                    val updatedContact = contact.copy(nombre = nombre, apellido = apellido, alias = alias, telefono = telefono, hobbie = hobbie)
+                    onSave(updatedContact)
+                    coroutineScope.launch { snackbarHostState.showSnackbar("Contacto guardado con éxito.") }
+                    onNavigateBack()
                 }
+            )
 
-                onNavigateBack()  // Navegar de regreso después de guardar
-            }) {
-                Text("Guardar Cambios") // Texto del botón de guardar
-            }
-
-            // Snackbar para mostrar mensajes temporales
-            SnackbarHost(hostState = snackbarHostState) // Muestra el snackbar para mensajes
+            SnackbarHost(hostState = snackbarHostState)
         }
     }
 }
